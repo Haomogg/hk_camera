@@ -1,11 +1,11 @@
 
 <launch>
-    <arg name="enable_imu_trigger" default="false"/>
+    <arg name="enable_imu_trigger" default="false"/> <!--定义了一个参数 enable_imu_trigger，默认值为 false-->
     <node pkg="nodelet" type="nodelet" name="vision_nodelet_right" args="manager"
           output="screen"/>
     <node pkg="nodelet" type="nodelet" name="hk_camera_right"
           args="load hk_camera/HKCameraNodelet vision_nodelet_right"
-          output="screen">
+          output="screen"> <!--args="load hk_camera/HKCameraNodelet vision_nodelet_right"：加载名为 HKCameraNodelet 的 nodelet，并将其绑定到 vision_nodelet_right 节点管理器上-->
         <param name="camera_name" value="hk_right"/>
         <param name="image_width" value="1440"/>
         <param name="image_height" value="1080"/>
@@ -20,7 +20,7 @@
         <param name="gamma_selector" value="0"/>
         <param name="gamma_value" value="0.7"/>
         <param name="stop_grab" value="false"/>
-        <remap from="/image_rect" to="/image_rect_right" />
+        <remap from="/image_rect" to="/image_rect_right" /> <!--将 /image_rect 话题重定向到 /image_rect_right-->
     </node>
     <node pkg="nodelet" type="nodelet" name="vision_nodelet_left" args="manager"
           output="screen"/>

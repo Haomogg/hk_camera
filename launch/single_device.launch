@@ -17,7 +17,7 @@
         <param name="enable_resolution" value="true"/>
         <param name="resolution_ratio_width" value="1440"/>
         <param name="resolution_ratio_height" value="1080"/>
-        <rosparam command="load" file="$(find hk_camera)/config/hk_camera_config.yaml" />
+        <rosparam command="load" file="$(find hk_camera)/config/hk_camera_config.yaml" /> <!--从指定文件中加载 ROS 参数。-->
         <remap from="/hk_camera/imu_trigger" to="/rm_ecat_hw/imu_trigger"/>
     </node>
 </launch>
