@@ -13,74 +13,74 @@
 
 namespace hk_camera
 {
-PLUGINLIB_EXPORT_CLASS(hk_camera::HKCameraNodelet, nodelet::Nodelet)
+PLUGINLIB_EXPORT_CLASS(hk_camera::HKCameraNodelet, nodelet::Nodelet) //PLUGINLIB_EXPORT_CLASS 宏，它将 hk_camera::HKCameraNodelet 类导出为一个名为 nodelet::Nodelet 的类
 HKCameraNodelet::HKCameraNodelet()
 {
 }
 
 void HKCameraNodelet::onInit()
 {
-  nh_ = this->getPrivateNodeHandle();
+  nh_ = this->getPrivateNodeHandle(); //获取了一个私有的节点句柄
   image_transport::ImageTransport it(nh_);
   pub_ = it.advertiseCamera("image_raw", 1);
 
-  nh_.param("camera_frame_id", image_.header.frame_id, std::string("camera_optical_frame"));
+  nh_.param("camera_frame_id", image_.header.frame_id, std::string("camera_optical_frame")); //相机框架 ID
   nh_.param("camera_name", camera_name_, std::string("camera"));
-  nh_.param("camera_info_url", camera_info_url_, std::string(""));
+  nh_.param("camera_info_url", camera_info_url_, std::string("")); //相机信息 URL
   nh_.param("image_width", image_width_, 1440);
   nh_.param("image_height", image_height_, 1080);
-  nh_.param("image_offset_x", image_offset_x_, 0);
+  nh_.param("image_offset_x", image_offset_x_, 0); //图像偏移量
   nh_.param("image_offset_y", image_offset_y_, 0);
-  nh_.param("pixel_format", pixel_format_, std::string("bgr8"));
-  nh_.param("frame_id", frame_id_, std::string("camera_optical_frame"));
-  nh_.param("camera_sn", camera_sn_, std::string(""));
-  nh_.param("frame_rate", frame_rate_, 200.0);
+  nh_.param("pixel_format", pixel_format_, std::string("bgr8")); //图像像素格式，默认为 "bgr8"
+  nh_.param("frame_id", frame_id_, std::string("camera_optical_frame")); //帧 ID，表示相机数据所在的坐标系，默认为 "camera_optical_frame"
+  nh_.param("camera_sn", camera_sn_, std::string("")); //相机序列号
+  nh_.param("frame_rate", frame_rate_, 200.0); //相机帧率
   nh_.param("sleep_time", sleep_time_, 0);
-  nh_.param("enable_imu_trigger", enable_imu_trigger_, false);
+  nh_.param("enable_imu_trigger", enable_imu_trigger_, false); //是否启用 IMU 触发
   nh_.param("imu_name", imu_name_, std::string("gimbal_imu"));
-  nh_.param("gain_value", gain_value_, 15.0);
-  nh_.param("gain_auto", gain_auto_, false);
+  nh_.param("gain_value", gain_value_, 15.0); //增益值
+  nh_.param("gain_auto", gain_auto_, false); //是否开启增益自动调节
   nh_.param("gamma_selector", gamma_selector_, 2);
   nh_.param("gamma_value", gamma_value_, 0.5);
   nh_.param("exposure_auto", exposure_auto_, true);
   nh_.param("exposure_value", exposure_value_, 20.0);
   nh_.param("exposure_max", exposure_max_, 3000.0);
   nh_.param("exposure_min", exposure_min_, 20.0);
-  nh_.param("white_auto", white_auto_, true);
-  nh_.param("white_selector", white_selector_, 0);
-  nh_.param("enable_resolution", enable_resolution_, false);
-  nh_.param("resolution_ratio_width", resolution_ratio_width_, 1440);
+  nh_.param("white_auto", white_auto_, true); //是否开启白平衡自动调节
+  nh_.param("white_selector", white_selector_, 0); //白平衡选项
+  nh_.param("enable_resolution", enable_resolution_, false); //是否启用分辨率调节
+  nh_.param("resolution_ratio_width", resolution_ratio_width_, 1440); //分辨率的宽度和高度比例
   nh_.param("resolution_ratio_height", resolution_ratio_height_, 1080);
-  nh_.param("stop_grab", stop_grab_, false);
+  nh_.param("stop_grab", stop_grab_, false); //停止数据采集的标志
 
-  info_manager_.reset(new camera_info_manager::CameraInfoManager(nh_, camera_name_, camera_info_url_));
+  info_manager_.reset(new camera_info_manager::CameraInfoManager(nh_, camera_name_, camera_info_url_)); // reset:重置 info_manager_ 智能指针的指向，使其指向一个新的对象
 
   // check for default camera info
-  if (!info_manager_->isCalibrated())
+  if (!info_manager_->isCalibrated()) //isCalibrated() 方法用于判断相机是否已经完成了校准
   {
     info_manager_->setCameraName(camera_name_);
     sensor_msgs::CameraInfo camera_info;
-    camera_info.header.frame_id = image_.header.frame_id;
-    camera_info.width = image_width_;
+    camera_info.header.frame_id = image_.header.frame_id; //将 camera_info 对象中的帧 ID 设置为与图像消息 image_ 的帧 ID 相同
+    camera_info.width = image_width_; //设置 camera_info 对象的宽度为图像宽度image_width_
     camera_info.height = image_height_;
-    info_manager_->setCameraInfo(camera_info);
+    info_manager_->setCameraInfo(camera_info); //将包含相机信息的 camera_info 对象传递给 CameraInfoManager 对象
   }
   ROS_INFO("Starting '%s' at %dx%d", camera_name_.c_str(), image_width_, image_height_);
-  info_ = std::move(info_manager_->getCameraInfo());
-  info_.header.frame_id = frame_id_;
+  info_ = std::move(info_manager_->getCameraInfo()); //使用 info_manager_ 获取相机的信息，并通过 std::move 移动赋值给 info_
+  info_.header.frame_id = frame_id_; //设置相机信息中的 header 的 frame_id 为之前从参数服务器中获取的 frame_id_
   image_.header.frame_id = frame_id_;
-  image_.height = image_height_;
+  image_.height = image_height_; //设置图像消息的高度和宽度为从参数服务器中获取的值
   image_.width = image_width_;
-  image_.step = image_width_ * 3;
-  image_.data.resize(image_.height * image_.step);
-  image_.encoding = pixel_format_;
+  image_.step = image_width_ * 3; //计算图像数据每行的字节数，通常是图像宽度乘以通道数（这里假设每个像素有 3 个通道）
+  image_.data.resize(image_.height * image_.step); //调整图像数据的大小，确保能够容纳整个图像数据
+  image_.encoding = pixel_format_; //设置图像消息的编码格式为之前从参数服务器中获取的 pixel_format_
   img_ = new unsigned char[image_.height * image_.step];
 
   MV_CC_DEVICE_INFO_LIST stDeviceList;
-  memset(&stDeviceList, 0, sizeof(MV_CC_DEVICE_INFO_LIST));
+  memset(&stDeviceList, 0, sizeof(MV_CC_DEVICE_INFO_LIST)); //使用 memset 函数将 stDeviceList 清零，确保数据初始化为 0
   try
   {
-    int nRet = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE, &stDeviceList);
+    int nRet = MV_CC_EnumDevices(MV_GIGE_DEVICE | MV_USB_DEVICE, &stDeviceList); //调用 MV_CC_EnumDevices 举支持 GigE 接口和 USB 接口的设备，并将设备列表信息存储在 stDeviceList 结构体中
     if (nRet != MV_OK)
       throw(nRet);
   }
