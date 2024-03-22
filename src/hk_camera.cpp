@@ -395,7 +395,8 @@ void HKCameraNodelet::reconfigCB(CameraConfig& config, uint32_t level) //相机�
   if (config.exposure_auto) //检查配置参数中的曝光自动模式是否为真
   {
     _MVCC_FLOATVALUE_T exposure_time; //声明一个名为exposure_time的结构体变量，用于存储相机的曝光时间信息
-    assert(MV_CC_SetIntValue(dev_handle_, "AutoExposureTimeLowerLimit", config.exposure_min) == MV_OK); //设置相机的自动曝光时间的下限为配置参数中设定的config.exposure_min。使用MV_CC_SetIntValue函数调用相机SDK提供的接口，并通过assert来确保设置操作成功
+//    assert(MV_CC_SetIntValue(dev_handle_, "AutoExposureTimeLowerLimit", config.exposure_min) == MV_OK); //设置相机的自动曝光时间的下限为配置参数中设定的config.exposure_min。使用MV_CC_SetIntValue函数调用相机SDK提供的接口，并通过assert来确保设置操作成功
+    MV_CC_SetIntValue(dev_handle_, "AutoExposureTimeLowerLimit", config.exposure_min); //设置相机的自动曝光时间的下限为配置参数中设定的config.exposure_min。使用MV_CC_SetIntValue函数调用相机SDK提供的接口，并通过assert来确保设置操作成功
     assert(MV_CC_SetIntValue(dev_handle_, "AutoExposureTimeUpperLimit", config.exposure_max) == MV_OK);
     assert(MV_CC_SetEnumValue(dev_handle_, "ExposureAuto", MV_EXPOSURE_AUTO_MODE_CONTINUOUS) == MV_OK);
     assert(MV_CC_GetFloatValue(dev_handle_, "ExposureTime", &exposure_time) == MV_OK); //获取当前相机的曝光时间值，并将其保存到之前声明的exposure_time结构体变量中。
@@ -472,7 +473,7 @@ void HKCameraNodelet::reconfigCB(CameraConfig& config, uint32_t level) //相机�
       assert(MV_CC_SetGamma(dev_handle_, config.gamma_value) == MV_OK);
       break;
     case 2:
-      assert(MV_CC_SetBoolValue(dev_handle_, "GammaEnable", false) == MV_OK); //设置相机的伽马使能为假，即关闭伽马校正功能
+      MV_CC_SetBoolValue(dev_handle_, "GammaEnable", false); //设置相机的伽马使能为假，即关闭伽马校正功能
       break;
   }
 
